@@ -17,7 +17,7 @@ connectDB();
 
 const corsOptions = {
   origin: [
-    "http://localhost:5173",
+    "https://fe-pbl4-ytsx.vercel.app",
     "http://192.168.1.38:5173",
     "https://5b69-2405-4802-95c1-5e90-f02f-2c02-4429-f0d1.ngrok-free.app",
   ], // Các địa chỉ frontend được phép truy cập
