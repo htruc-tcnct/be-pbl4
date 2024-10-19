@@ -96,10 +96,13 @@ passport.deserializeUser(function (user, cb) {
     return cb(null, user); // Đảm bảo `idDoc` hoặc các trường khác được bao gồm ở đây
   });
 });
-
 router.get("/user-info", (req, res) => {
-  // console.log("Authenticated user:", req.user); // Debug log to verify user data
-  res.json(req.user);
+  console.log("Session data:", req.session); // In ra dữ liệu session để kiểm tra
+  console.log("User data:", req.user); // In ra req.user để kiểm tra
+  if (!req.user) {
+    return res.status(401).json({ message: "User not authenticated" });
+  }
+  res.json(req.user); // Trả về thông tin người dùng
 });
 router.post("/update-user", async (req, res) => {
   if (!req.user) {

@@ -71,7 +71,7 @@ app.use((err, req, res, next) => {
     },
   });
 });
-
+app.use(express.json());
 process.on("SIGINT", async () => {
   await mongoose.connection.close();
   console.log("Mongoose disconnected on app termination");

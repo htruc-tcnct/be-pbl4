@@ -39,6 +39,33 @@ exports.get_all_user = (req, res, next) => {
       }
     });
 };
+exports.get_by_id = (req, res, next) => {
+  const id = req.params.id;
+
+  User.findById(id)
+    .exec()
+    .then((user) => {
+      if (user) {
+        const response = {
+          email: user.email,
+          _id: user._id,
+          avatar: user.avatar,
+          request: {
+            type: "GET",
+            url: "http://localhost:3000/user/" + user._id,
+          },
+        };
+        res.status(200).json(response); // Trả về thông tin người dùng
+      } else {
+        res.status(404).json({ message: "No user found with this ID" }); // Không tìm thấy người dùng
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).json({ message: "Error finding user", error: err }); // Xử lý lỗi
+    });
+};
+
 exports.create_user = (req, res, next) => {
   console.log("Request Body:", req.body); // Log request body
 
