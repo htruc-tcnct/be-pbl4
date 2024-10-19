@@ -47,6 +47,7 @@ exports.get_by_id = (req, res, next) => {
     .then((user) => {
       if (user) {
         const response = {
+          name: user.name,
           email: user.email,
           _id: user._id,
           avatar: user.avatar,
