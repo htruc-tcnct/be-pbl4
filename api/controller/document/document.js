@@ -292,14 +292,14 @@ exports.update_everytime = async (req, res) => {
 };
 exports.on_share_code = async (req, res) => {
   const { shareCode } = req.params;
-  const userId = req.user._id; // Lấy _id của người dùng từ req.user
 
-  // Kiểm tra nếu không có người dùng (người dùng chưa đăng nhập)
-  if (!userId) {
+  if (!req.user || !req.user._id) {
     return res.status(401).json({
       message: "You need to be logged in to access this document.",
     });
   }
+
+  const userId = req.user._id;
 
   try {
     const document = await Document.findOne({ shareCode });
@@ -310,7 +310,6 @@ exports.on_share_code = async (req, res) => {
       });
     }
 
-    // So sánh documentOwnerID với _id của người dùng
     if (document.documentOwnerID.toString() === userId.toString()) {
       return res.status(200).json({
         message: "Document found.",
@@ -322,7 +321,6 @@ exports.on_share_code = async (req, res) => {
       });
     }
 
-    // Nếu tài liệu bị hạn chế quyền truy cập
     if (
       document.accessLevel === "Restricted" &&
       document.documentOwnerID.toString() !== userId.toString()
@@ -348,6 +346,7 @@ exports.on_share_code = async (req, res) => {
     });
   }
 };
+
 exports.share_Document_with_email = async (req, res) => {
   const { email, id } = req.body;
 

@@ -1,14 +1,11 @@
-// config/passport.js or similar
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
-const User = require("../../models/user"); // Adjust the path as necessary
+const User = require("../../models/user");
 const bcrypt = require("bcrypt");
-
-// Define the local strategy
 
 passport.use(
   new LocalStrategy(
-    { usernameField: "email", passwordField: "password" }, // Use email and password fields
+    { usernameField: "email", passwordField: "password" },
     async (email, password, done) => {
       try {
         const user = await User.findOne({ email: email });
@@ -21,7 +18,6 @@ passport.use(
           return done(null, false, { message: "Incorrect email or password." });
         }
 
-        // Successful authentication
         return done(null, user);
       } catch (err) {
         return done(err);
@@ -29,12 +25,11 @@ passport.use(
     }
   )
 );
-// Serialize user into the session
+
 passport.serializeUser((user, done) => {
   done(null, user.id);
 });
 
-// Deserialize user from the session
 passport.deserializeUser(async (id, done) => {
   try {
     const user = await User.findById(id);

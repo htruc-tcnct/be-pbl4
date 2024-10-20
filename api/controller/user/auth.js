@@ -13,7 +13,7 @@ passport.use(
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       callbackURL: "/oauth2/redirect/google",
-      // "/oauth2/redirect/google",
+
       scope: ["profile", "email"],
     },
     async function verify(issuer, profile, cb) {
@@ -69,11 +69,10 @@ passport.use(
 
 router.get("/login/federated/google", passport.authenticate("google"));
 
-// Google OAuth callbackroute
 router.get(
   "/oauth2/redirect/google",
   passport.authenticate("google", {
-    failureRedirect: `${process.env.CLIENT_URL}`, // On failure, redirect to frontend's landing page
+    failureRedirect: `${process.env.CLIENT_URL}`,
   }),
   function (req, res) {
     res.redirect(`${process.env.CLIENT_URL}/home`);
@@ -87,22 +86,22 @@ passport.serializeUser(function (user, cb) {
       idDoc: user.idDoc,
       name: user.name,
       email: user.email,
-    }); // Thêm idDoc nếu cần
+    });
   });
 });
 
 passport.deserializeUser(function (user, cb) {
   process.nextTick(function () {
-    return cb(null, user); // Đảm bảo `idDoc` hoặc các trường khác được bao gồm ở đây
+    return cb(null, user);
   });
 });
 router.get("/user-info", (req, res) => {
-  console.log("Session data:", req.session); // In ra dữ liệu session để kiểm tra
-  console.log("User data:", req.user); // In ra req.user để kiểm tra
+  console.log("Session data:", req.session);
+  console.log("User data:", req.user);
   if (!req.user) {
     return res.status(401).json({ message: "User not authenticated" });
   }
-  res.json(req.user); // Trả về thông tin người dùng
+  res.json(req.user);
 });
 router.post("/update-user", async (req, res) => {
   if (!req.user) {
@@ -116,23 +115,21 @@ router.post("/update-user", async (req, res) => {
       req.user.id,
       {
         name,
-        dateOfBirth: new Date(dateOfBirth), // Chuyển đổi ngày tháng từ string sang Date
+        dateOfBirth: new Date(dateOfBirth),
         avatar,
       },
-      { new: true } // Tùy chọn trả về bản ghi đã được cập nhật
+      { new: true }
     );
 
     if (!updatedUser) {
       return res.status(404).json({ message: "User not found" });
     }
-
-    // res.json(updatedUser);
   } catch (error) {
     console.error("Error updating user:", error);
     res.status(500).json({ message: "Error updating user information" });
   }
 });
-// Logout route
+
 router.post("/logout", function (req, res, next) {
   req.logout(function (err) {
     if (err) {
