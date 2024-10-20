@@ -136,7 +136,7 @@ exports.login = (req, res, next) => {
             .status(500)
             .json({ message: "Session save failed", error: err });
         }
-
+        console.log("Auth successfull");
         // Trả về thông tin đăng nhập thành công và thông tin người dùng
         res.status(200).json({
           message: "Auth successful",
