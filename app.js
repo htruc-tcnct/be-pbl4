@@ -37,7 +37,7 @@ app.use(
     store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }), // Đảm bảo session được lưu trữ
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // Chỉ bật nếu bạn đang chạy HTTPS
+      secure: true, // Chỉ bật nếu bạn đang chạy HTTPS
       sameSite: "none", // Cho phép cookie cross-site nếu frontend và backend ở các domain khác nhau
       maxAge: 24 * 60 * 60 * 1000, // 24 giờ
     },
