@@ -2,65 +2,46 @@ const http = require("http");
 const app = require("./app");
 const DocumentChange = require("./api/models/documentChange");
 const port = process.env.PORT || 5000;
+const Document = require("./api/models/document");
 const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server, {
   cors: {
-    origin: [
-      "https://fe-pbl4-ytsx.vercel.app",
-      "http://192.168.1.38:5173",
-      "https://5b69-2405-4802-95c1-5e90-f02f-2c02-4429-f0d1.ngrok-free.app",
-    ],
+    origin: ["https://fe-pbl4-ytsx.vercel.app", "http://localhost:5173"],
   },
 });
 
 let pendingChanges = {};
 let saveTimers = {};
 
-const saveChangeToDatabase = async (versionID, delta) => {
-  const newChange = new DocumentChange({
-    versionID: versionID,
-    changedContent: JSON.stringify(delta),
-  });
-  await newChange.save();
-  console.log("Change saved to database:", newChange);
-};
-
 io.on("connection", async (socket) => {
-  console.log("a user connected");
+  console.log("Client connected:", socket.id);
 
-  socket.on("send-change", async (delta, versionID, storedIdUser) => {
-    if (!versionID) {
-      console.error("Error: versionID is missing");
-      return;
+  socket.on("get-document", async (documentId) => {
+    if (!documentId) return;
+
+    try {
+      const document = await findOrCreateDocument(documentId);
+      socket.join(documentId);
+
+      socket.emit("load-document", document.data);
+
+      socket.on("send-changes", (delta) => {
+        socket.broadcast.to(documentId).emit("receive-changes", delta);
+      });
+
+      socket.on("save-document", async (data) => {
+        await Document.findByIdAndUpdate(documentId, { data });
+      });
+    } catch (error) {
+      console.error("Error handling document:", error);
+      socket.emit("error", "Could not load or save the document.");
     }
-
-    if (!pendingChanges[socket.id]) {
-      pendingChanges[socket.id] = [];
-    }
-    pendingChanges[socket.id].push(delta);
-
-    if (saveTimers[socket.id]) {
-      clearTimeout(saveTimers[socket.id]);
-    }
-
-    saveTimers[socket.id] = setTimeout(async () => {
-      const combinedDelta = pendingChanges[socket.id];
-      await saveChangeToDatabase(versionID, combinedDelta);
-
-      // Sau khi lưu, xóa các thay đổi tạm thời và hẹn giờ
-      delete pendingChanges[socket.id];
-      delete saveTimers[socket.id];
-    }, 7000);
-
-    // Phát lại delta tới các client khác
-    socket.broadcast.emit("receive-change", delta);
   });
 
   socket.on("disconnect", () => {
     console.log("user disconnected");
 
-    // Nếu người dùng ngắt kết nối và còn hẹn giờ lưu, hủy hẹn giờ
     if (saveTimers[socket.id]) {
       clearTimeout(saveTimers[socket.id]);
       delete saveTimers[socket.id];
@@ -68,7 +49,16 @@ io.on("connection", async (socket) => {
     }
   });
 });
+const defaultValue = "";
 
+async function findOrCreateDocument(id) {
+  if (!id) return null;
+
+  let document = await Document.findById(id);
+  if (document) return document;
+
+  return await Document.create({ _id: id, data: defaultValue });
+}
 server.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
