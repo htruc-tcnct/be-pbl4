@@ -16,11 +16,7 @@ const documentRoutes = require("./api/routes/document");
 connectDB();
 
 const corsOptions = {
-  origin: [
-    "https://fe-pbl4-ytsx.vercel.app",
-    "http://localhost:5173",
-    "https://5b69-2405-4802-95c1-5e90-f02f-2c02-4429-f0d1.ngrok-free.app",
-  ], // Các địa chỉ frontend được phép truy cập
+  origin: ["https://fe-pbl4-ytsx.vercel.app", "http://localhost:5173"], // Các địa chỉ frontend được phép truy cập
   credentials: true, // Cho phép gửi cookie, token, v.v.
 };
 app.use(cors(corsOptions));
