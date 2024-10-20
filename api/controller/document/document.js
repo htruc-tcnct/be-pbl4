@@ -72,7 +72,6 @@ exports.get_documents_by_owner_id = (req, res, next) => {
       }
     })
     .catch((err) => {
-      console.error("Error fetching documents:", err); // Log chi tiết lỗi
       res.status(500).json({
         message: "An error occurred while fetching documents",
         error: err,
@@ -103,7 +102,6 @@ exports.get_by_document_id = (req, res, next) => {
       }
     })
     .catch((err) => {
-      console.error("Error fetching documents:", err); // Log chi tiết lỗi
       res.status(500).json({
         message: "An error occurred while fetching documents",
         error: err,
@@ -162,7 +160,6 @@ exports.create_document = async (req, res) => {
       permission: ownerPermission,
     });
   } catch (error) {
-    console.error(error);
     res.status(500).json({ message: "Error creating document", error });
   }
 };
@@ -238,7 +235,6 @@ exports.delete_document = (req, res, next) => {
 exports.checkDocumentPermission = async (req, res, next) => {
   const { documentID } = req.params;
   // const userID = req.user._id; // ID người dùng từ JWT hoặc session
-  console.log(req);
   try {
     const document = await Document.findById(documentID);
 
@@ -295,7 +291,7 @@ exports.on_share_code = async (req, res) => {
 
   if (!req.user || !req.user._id) {
     return res.status(401).json({
-      message: "You need to be logged in to access this document.",
+      message: "You need to be logged in to access this document.rr",
     });
   }
 
@@ -339,7 +335,6 @@ exports.on_share_code = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error finding document by shareCode:", error);
     res.status(500).json({
       message: "An error occurred while fetching the document.",
       error,
@@ -393,15 +388,12 @@ exports.share_Document_with_email = async (req, res) => {
 
     transporter.sendMail(mailOptions, function (error, info) {
       if (error) {
-        console.log(error);
         return res.status(500).json({ error: "Failed to send email" });
       } else {
-        console.log("Email sent: " + info.response);
         return res.status(200).json({ message: "Email sent successfully" });
       }
     });
   } catch (err) {
-    console.error(err);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };

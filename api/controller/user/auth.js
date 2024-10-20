@@ -90,10 +90,18 @@ passport.serializeUser(function (user, cb) {
   });
 });
 
-passport.deserializeUser(function (user, cb) {
-  process.nextTick(function () {
-    return cb(null, user);
-  });
+// passport.deserializeUser(function (user, cb) {
+//   process.nextTick(function () {
+//     return cb(null, user);
+//   });
+// });
+passport.deserializeUser(async function (id, done) {
+  try {
+    const user = await User.findById(id); // Tìm người dùng trong database qua _id
+    done(null, user);
+  } catch (err) {
+    done(err, null);
+  }
 });
 router.get("/user-info", (req, res) => {
   console.log("Session data:", req.session);
