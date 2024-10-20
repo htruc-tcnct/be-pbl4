@@ -7,7 +7,7 @@ const { Server } = require("socket.io");
 const { json } = require("body-parser");
 const io = new Server(server, {
   cors: {
-    origin: "*", // cho phép all để test
+    origin: ["https://fe-pbl4-ytsx.vercel.app", "http://localhost:5173"],
   },
 });
 io.on("connection", (socket) => {
