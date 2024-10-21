@@ -29,17 +29,18 @@ app.use((req, res, next) => {
 });
 app.options("*", cors(corsOptions)); // Đảm bảo xử lý các yêu cầu OPTIONS
 
+const isProduction = process.env.NODE_ENV === "production";
+
 app.use(
   session({
     secret: "your_secret_key",
     resave: false,
     saveUninitialized: false,
-    store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }), // Đảm bảo session được lưu trữ
     cookie: {
-      httpOnly: true,
-      secure: true, // Chỉ bật nếu bạn đang chạy HTTPS
-      sameSite: "none", // Cho phép cookie cross-site nếu frontend và backend ở các domain khác nhau
-      maxAge: 24 * 60 * 60 * 1000, // 24 giờ
+      secure: isProduction, // Secure chỉ bật khi ở môi trường production (HTTPS)
+      httpOnly: true, // Không cho truy cập cookie từ JavaScript
+      maxAge: 24 * 60 * 60 * 1000, // 1 ngày
+      sameSite: isProduction ? "none" : "lax", // Chỉ đặt 'none' khi ở production (cross-site cookies)
     },
   })
 );
