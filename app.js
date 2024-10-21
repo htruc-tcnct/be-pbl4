@@ -16,7 +16,7 @@ const documentRoutes = require("./api/routes/document");
 connectDB();
 
 const corsOptions = {
-  origin: ["https://fe-pbl4-ytsx.vercel.app", "http://localhost:5173"], // Các địa chỉ frontend được phép truy cập
+  origin: ["http://localhost:5173"],
   credentials: true,
 };
 app.use(cors(corsOptions));
@@ -27,20 +27,17 @@ app.use((req, res, next) => {
   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
   next();
 });
-app.options("*", cors(corsOptions)); // Đảm bảo xử lý các yêu cầu OPTIONS
-
-const isProduction = process.env.NODE_ENV === "production";
+app.options("*", cors(corsOptions));
 
 app.use(
   session({
-    secret: "your_secret_key",
+    secret: "keyboard cat",
     resave: false,
     saveUninitialized: false,
+    store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
     cookie: {
-      secure: isProduction, // Secure chỉ bật khi ở môi trường production (HTTPS)
-      httpOnly: true, // Không cho truy cập cookie từ JavaScript
-      maxAge: 24 * 60 * 60 * 1000, // 1 ngày
-      sameSite: isProduction ? "none" : "lax", // Chỉ đặt 'none' khi ở production (cross-site cookies)
+      httpOnly: false,
+      secure: false,
     },
   })
 );
@@ -70,7 +67,7 @@ app.use((err, req, res, next) => {
     },
   });
 });
-app.use(express.json());
+
 process.on("SIGINT", async () => {
   await mongoose.connection.close();
   console.log("Mongoose disconnected on app termination");

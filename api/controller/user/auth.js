@@ -75,6 +75,10 @@ router.get(
     failureRedirect: `${process.env.CLIENT_URL}`,
   }),
   function (req, res) {
+    res.json({
+      message: "Auth successful",
+      user: req.user,
+    });
     res.redirect(`${process.env.CLIENT_URL}/home`);
   }
 );
