@@ -22,7 +22,6 @@ const allowedOrigins = [
 
 const corsOptions = {
   origin: function (origin, callback) {
-    // Kiểm tra xem miền có nằm trong danh sách cho phép hay không
     if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
       callback(null, true); // Cho phép miền
     } else {
