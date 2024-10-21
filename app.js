@@ -38,9 +38,11 @@ app.use(
     cookie: {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
+      sameSite: "none",
     },
   })
 );
+app.set("trust proxy", 1); // Tin tưởng proxy khi ứng dụng chạy qua proxy
 
 app.use(passport.initialize());
 app.use(passport.session());
