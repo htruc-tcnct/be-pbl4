@@ -15,23 +15,10 @@ const authRouter = require("./api/controller/user/auth");
 const documentRoutes = require("./api/routes/document");
 connectDB();
 
-const allowedOrigins = [
-  "http://localhost:5173", // Miền cho môi trường phát triển
-  "https://fe-pbl4-ytsx.vercel.app",
-  "https://fe-pbl4.onrender.com/",
-];
-
 const corsOptions = {
-  origin: function (origin, callback) {
-    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
-      callback(null, true); // Cho phép miền
-    } else {
-      callback(new Error("Not allowed by CORS")); // Từ chối miền
-    }
-  },
-  credentials: true, // Cho phép gửi cookie
+  origin: ["http://localhost:5173", "https://fe-pbl4-ytsx.vercel.app"],
+  credentials: true,
 };
-
 app.use(cors(corsOptions));
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", req.headers.origin);
@@ -55,6 +42,7 @@ app.use(
     },
   })
 );
+app.set("trust proxy", 1); // Tin tưởng proxy khi ứng dụng chạy qua proxy
 
 app.use(passport.initialize());
 app.use(passport.session());
