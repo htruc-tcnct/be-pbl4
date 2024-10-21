@@ -16,7 +16,9 @@ const documentRoutes = require("./api/routes/document");
 connectDB();
 const corsOptions = {
   origin: ["http://localhost:5173", "https://fe-pbl4-ytsx.vercel.app"],
-  credentials: true, // This allows cookies to be sent with requests
+  credentials: true,
+  origin: true,
+  exposedHeaders: ["Set-Cookie"], // This allows cookies to be sent with requests
 };
 
 app.use(cors(corsOptions));
@@ -52,7 +54,7 @@ app.use((req, res, next) => {
   err.status = 404;
   next(err);
 });
-
+app.set("trust proxy", true);
 app.use((err, req, res, next) => {
   res.status(err.status || 500);
   res.json({
