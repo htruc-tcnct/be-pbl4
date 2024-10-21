@@ -17,12 +17,12 @@ connectDB();
 const corsOptions = {
   origin: ["http://localhost:5173", "https://fe-pbl4-ytsx.vercel.app"],
   credentials: true,
-  exposedHeaders: ["Set-cookie"], // This allows cookies to be sent with requests
+  exposedHeaders: ["Set-cookie"],
 };
 
 app.use(cors(corsOptions));
 
-app.options("*", cors(corsOptions)); // Handle preflight requests
+app.options("*", cors(corsOptions));
 
 app.use(
   session({
@@ -33,6 +33,7 @@ app.use(
     cookie: {
       httpOnly: true,
       secure: false,
+      sameSite: "none",
     },
   })
 );
