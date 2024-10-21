@@ -17,8 +17,7 @@ connectDB();
 const corsOptions = {
   origin: ["http://localhost:5173", "https://fe-pbl4-ytsx.vercel.app"],
   credentials: true,
-  origin: true,
-  exposedHeaders: ["Set-Cookie"], // This allows cookies to be sent with requests
+  exposedHeaders: ["Set-cookie"], // This allows cookies to be sent with requests
 };
 
 app.use(cors(corsOptions));
