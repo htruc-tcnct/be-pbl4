@@ -20,14 +20,6 @@ const corsOptions = {
   credentials: true,
 };
 app.use(cors(corsOptions));
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", req.headers.origin);
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  next();
-});
-app.options("*", cors(corsOptions)); // Đảm bảo xử lý các yêu cầu OPTIONS
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -37,10 +29,10 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: isProduction, // Secure chỉ bật khi ở môi trường production (HTTPS)
-      httpOnly: true, // Không cho truy cập cookie từ JavaScript
-      maxAge: 24 * 60 * 60 * 1000, // 1 ngày
-      sameSite: isProduction ? "none" : "lax", // Chỉ đặt 'none' khi ở production (cross-site cookies)
+      secure: isProduction,
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000,
+      sameSite: "none",
     },
   })
 );
