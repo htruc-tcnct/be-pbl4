@@ -32,8 +32,9 @@ app.use(
     store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
     cookie: {
       httpOnly: true,
-      secure: true,
-      sameSite: "None",
+      // secure: false,//chay local
+      secure: true, //chay deploy
+      sameSite: "None", //chay deploy
     },
   })
 );
@@ -54,7 +55,6 @@ app.use((req, res, next) => {
   err.status = 404;
   next(err);
 });
-app.set("trust proxy", true);
 app.use((err, req, res, next) => {
   res.status(err.status || 500);
   res.json({

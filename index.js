@@ -11,23 +11,19 @@ const io = new Server(server, {
     credentials: true,
   },
 });
-
 io.on("connection", (socket) => {
-  console.log("A user connected", socket.id);
-
-  // Nhận ký tự chèn từ client
-  socket.on("crdt-insert", (data) => {
-    socket.broadcast.emit("crdt-insert", data);
+  console.log("a user connected");
+  socket.on("insert-one", (charToInsert) => {
+    const kiTu = JSON.parse(charToInsert);
+    console.log("insert : ", kiTu);
+    socket.broadcast.emit("update-insert-one", charToInsert);
   });
-
-  // Nhận yêu cầu xóa ký tự từ client
-  socket.on("crdt-delete", (data) => {
-    socket.broadcast.emit("crdt-delete", data);
+  socket.on("delete-one", (charToDelete) => {
+    console.log("delete : ", JSON.parse(charToDelete));
+    socket.broadcast.emit("update-delete-one", charToDelete);
   });
-
-  // Lắng nghe sự kiện ngắt kết nối
   socket.on("disconnect", () => {
-    console.log("User disconnected", socket.id);
+    console.log("user disconnected");
   });
 });
 
