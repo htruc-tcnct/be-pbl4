@@ -37,11 +37,10 @@ app.use(
     store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
     cookie: {
       httpOnly: true,
-      secure: true,
+      secure: false,
     },
   })
 );
-app.set("trust proxy", 1); // Tin tưởng proxy khi ứng dụng chạy qua proxy
 
 app.use(passport.initialize());
 app.use(passport.session());
