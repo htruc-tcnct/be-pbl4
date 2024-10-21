@@ -7,7 +7,11 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: [
+      "http://localhost:5173", // Miền cho môi trường phát triển
+      "https://fe-pbl4-ytsx.vercel.app",
+      "https://fe-pbl4.onrender.com/",
+    ],
     credentials: true,
   },
 });

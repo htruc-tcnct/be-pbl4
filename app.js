@@ -17,7 +17,8 @@ connectDB();
 
 const allowedOrigins = [
   "http://localhost:5173", // Miền cho môi trường phát triển
-  "https://fe-pbl4-ytsx.vercel.app", // Miền cho môi trường sản xuất
+  "https://fe-pbl4-ytsx.vercel.app",
+  "https://fe-pbl4.onrender.com/",
 ];
 
 const corsOptions = {
