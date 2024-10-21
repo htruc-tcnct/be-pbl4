@@ -1,5 +1,5 @@
 const http = require("http");
-const app = require("./app"); // Giả sử app.js tồn tại
+const app = require("./app"); // Assume app.js exists
 const { Server } = require("socket.io");
 
 const port = process.env.PORT || 5000;
@@ -12,23 +12,25 @@ const io = new Server(server, {
 });
 
 io.on("connection", (socket) => {
-  console.log("A user connected");
+  console.log("A user connected", socket.id);
 
-  // Nhận ký tự được chèn từ client và phát lại cho các client khác
+  // Nhận ký tự chèn từ client
   socket.on("crdt-insert", (data) => {
     console.log("Insert:", data);
-    socket.broadcast.emit("crdt-insert", data); // Phát lại sự kiện chèn
+    // Phát lại sự kiện này cho tất cả các client khác (ngoại trừ người gửi)
+    socket.broadcast.emit("crdt-insert", data);
   });
 
-  // Nhận ký tự bị xóa từ client và phát lại cho các client khác
+  // Nhận yêu cầu xóa ký tự từ client
   socket.on("crdt-delete", (data) => {
     console.log("Delete:", data);
-    socket.broadcast.emit("crdt-delete", data); // Phát lại sự kiện xóa
+    // Phát lại sự kiện xóa cho tất cả các client khác
+    socket.broadcast.emit("crdt-delete", data);
   });
 
   // Lắng nghe sự kiện ngắt kết nối
   socket.on("disconnect", () => {
-    console.log("User disconnected");
+    console.log("User disconnected", socket.id);
   });
 });
 
