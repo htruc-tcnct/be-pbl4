@@ -16,7 +16,7 @@ const documentRoutes = require("./api/routes/document");
 connectDB();
 
 const corsOptions = {
-  origin: ["http://localhost:5173", "https://fe-pbl4-ytsx.vercel.app/"],
+  origin: ["http://localhost:5173", "https://fe-pbl4-ytsx.vercel.app"],
   credentials: true,
 };
 app.use(cors(corsOptions));
