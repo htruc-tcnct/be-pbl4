@@ -15,10 +15,23 @@ const authRouter = require("./api/controller/user/auth");
 const documentRoutes = require("./api/routes/document");
 connectDB();
 
+const allowedOrigins = [
+  "http://localhost:5173", // Miền cho môi trường phát triển
+  "https://fe-pbl4-ytsx.vercel.app", // Miền cho môi trường sản xuất
+];
+
 const corsOptions = {
-  origin: "*",
-  credentials: true,
+  origin: function (origin, callback) {
+    // Kiểm tra xem miền có nằm trong danh sách cho phép hay không
+    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+      callback(null, true); // Cho phép miền
+    } else {
+      callback(new Error("Not allowed by CORS")); // Từ chối miền
+    }
+  },
+  credentials: true, // Cho phép gửi cookie
 };
+
 app.use(cors(corsOptions));
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", req.headers.origin);
