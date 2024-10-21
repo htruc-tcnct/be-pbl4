@@ -17,14 +17,14 @@ connectDB();
 
 const corsOptions = {
   origin: ["https://fe-pbl4-ytsx.vercel.app", "http://localhost:5173"], // Các địa chỉ frontend được phép truy cập
-  credentials: true, // Cho phép gửi cookie, token, v.v.
+  credentials: true,
 };
 app.use(cors(corsOptions));
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", req.headers.origin); // Đảm bảo chỉ định rõ ràng origin của client
-  res.header("Access-Control-Allow-Credentials", "true"); // Cho phép credentials như cookie hoặc token
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS"); // Các phương thức HTTP được phép
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization"); // Các header được phép
+  res.header("Access-Control-Allow-Origin", req.headers.origin);
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
   next();
 });
 app.options("*", cors(corsOptions)); // Đảm bảo xử lý các yêu cầu OPTIONS
