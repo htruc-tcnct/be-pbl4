@@ -34,7 +34,7 @@ app.use(
       httpOnly: true,
       priority: "high",
       partitioned: true,
-      secure: false, //chay local
+      secure: true, //chay local
       // secure: true, //chay deploy
       sameSite: "none", //chay deploy
       maxAge: 24 * 60 * 60 * 1000,
