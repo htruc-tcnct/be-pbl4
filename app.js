@@ -32,8 +32,10 @@ app.use(
     store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
     cookie: {
       httpOnly: true,
-      // secure: false, //chay local
-      secure: true, //chay deploy
+      priority: "high",
+      partitioned: true,
+      secure: false, //chay local
+      // secure: true, //chay deploy
       sameSite: "none", //chay deploy
     },
   })
