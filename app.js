@@ -23,6 +23,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 app.options("*", cors(corsOptions));
+app.set("trust proxy", true);
 
 app.use(
   session({
@@ -32,8 +33,10 @@ app.use(
     store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
     cookie: {
       httpOnly: true,
-      secure: false, //chay local
+      priority: "high",
+      secure: true, //chay local
       // secure: true, //chay deploy
+      sameSite: "none", //chay deploy
       maxAge: 24 * 60 * 60 * 1000,
     },
   })
