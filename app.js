@@ -34,8 +34,8 @@ app.use(
       httpOnly: true,
       priority: "high",
       partitioned: true,
-      secure: false, //chay local
-      // secure: true, //chay deploy
+      // secure: false, //chay local
+      secure: true, //chay deploy
       sameSite: "none", //chay deploy
     },
   })
