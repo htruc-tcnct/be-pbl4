@@ -34,7 +34,7 @@ app.use(
       httpOnly: true,
       // secure: false, //chay local
       secure: true, //chay deploy
-      sameSite: "none", //chay deploy
+      sameSite: "None", //chay deploy
     },
   })
 );
