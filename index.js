@@ -11,19 +11,24 @@ const io = new Server(server, {
     credentials: true,
   },
 });
+
 io.on("connection", (socket) => {
-  console.log("a user connected");
-  socket.on("insert-one", (charToInsert) => {
-    const kiTu = JSON.parse(charToInsert);
-    console.log("insert : ", kiTu);
-    socket.broadcast.emit("update-insert-one", charToInsert);
+  console.log(`A user connected: ${socket.id}`);
+
+  // Nhận sự kiện chèn từ client
+  socket.on("crdt-insert", (data) => {
+    console.log(`User ${socket.id} inserted:`, data);
+    socket.broadcast.emit("crdt-insert", data); // Phát sự kiện tới các client khác
   });
-  socket.on("delete-one", (charToDelete) => {
-    console.log("delete : ", JSON.parse(charToDelete));
-    socket.broadcast.emit("update-delete-one", charToDelete);
+
+  // Nhận sự kiện xóa từ client
+  socket.on("crdt-delete", (data) => {
+    console.log(`User ${socket.id} deleted:`, data);
+    socket.broadcast.emit("crdt-delete", data); // Phát sự kiện xóa tới các client khác
   });
+
   socket.on("disconnect", () => {
-    console.log("user disconnected");
+    console.log(`User disconnected: ${socket.id}`);
   });
 });
 
