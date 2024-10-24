@@ -36,9 +36,9 @@ app.use(
     cookie: {
       httpOnly: true,
       priority: "high",
-      secure: false, //chay local
-      // secure: true, //chay deploy
-      // sameSite: "none", //chay deploy
+      // secure: false, //chay local
+      secure: true, //chay deploy
+      sameSite: "none", //chay deploy
       maxAge: 24 * 60 * 60 * 1000,
     },
   })
