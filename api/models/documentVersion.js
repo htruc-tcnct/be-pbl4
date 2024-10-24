@@ -13,14 +13,16 @@ const documentVersionSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  versionContent: {
+    type: String, // Chỉ lưu những thay đổi nhỏ
+  },
+  content: {
+    type: String, // Lưu toàn bộ nội dung tài liệu
+  },
   changedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
-  },
-  versionContent: {
-    type: String,
-    // required: true,
   },
   isRestored: {
     type: Boolean,

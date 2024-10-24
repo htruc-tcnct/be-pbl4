@@ -1,30 +1,41 @@
 const http = require("http");
 const app = require("./app");
 const { Server } = require("socket.io");
-
+var ot_toy = require("./ot_toy");
 const port = process.env.PORT || 5000;
 const server = http.createServer(app);
+var docState = new ot_toy.DocState();
+
+var rev = 0;
+function broadcast() {
+  if (rev < docState.ops.length) {
+    io.emit("update", docState.ops.slice(rev));
+    rev = docState.ops.length;
+  }
+}
 
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:5173", "https://fe-pbl4-ytsx.vercel.app"],
+    origin: [
+      "http://localhost:5173",
+      "https://fe-pbl4-ytsx.vercel.app",
+      "http://192.168.1.4:5173",
+    ],
     credentials: true,
   },
 });
-io.on("connection", (socket) => {
-  console.log("a user connected");
-  socket.on("insert-one", (charToInsert) => {
-    const kiTu = JSON.parse(charToInsert);
-    console.log("insert : ", kiTu);
-    socket.broadcast.emit("update-insert-one", charToInsert);
+
+io.on("connection", function (socket) {
+  var peer = new ot_toy.Peer();
+  console.log("client connected");
+  socket.on("update", function (ops) {
+    for (var i = 0; i < ops.length; i++) {
+      peer.merge_op(docState, ops[i]);
+    }
+    broadcast();
+    console.log("update: " + JSON.stringify(ops) + ": " + docState.get_str());
   });
-  socket.on("delete-one", (charToDelete) => {
-    console.log("delete : ", JSON.parse(charToDelete));
-    socket.broadcast.emit("update-delete-one", charToDelete);
-  });
-  socket.on("disconnect", () => {
-    console.log("user disconnected");
-  });
+  socket.emit("update", docState.ops);
 });
 
 server.listen(port, "0.0.0.0", () => {
