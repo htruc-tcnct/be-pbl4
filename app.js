@@ -24,9 +24,6 @@ app.use(cors(corsOptions));
 
 app.options("*", cors(corsOptions));
 
-//deploy
-app.set("trust proxy", true);
-
 app.use(
   session({
     secret: "keyboard cat",
@@ -44,6 +41,8 @@ app.use(
   })
 );
 
+//deploy
+app.set("trust proxy", true);
 app.use(passport.initialize());
 app.use(passport.session());
 
