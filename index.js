@@ -4,7 +4,6 @@ const app = require("./app");
 const port = process.env.PORT || 5000;
 const server = http.createServer(app);
 const { Server } = require("socket.io");
-var ot_toy = require("./ot_toy");
 const { json } = require("body-parser");
 const io = new Server(server, {
   cors: {
@@ -12,26 +11,28 @@ const io = new Server(server, {
     credentials: true,
   },
 });
-var docState = new ot_toy.DocState();
+var priority = "A";
 
-var rev = 0;
-function broadcast() {
-  if (rev < docState.ops.length) {
-    io.emit("update", docState.ops.slice(rev));
-    rev = docState.ops.length;
-  }
-}
-io.on("connection", function (socket) {
-  var peer = new ot_toy.Peer();
-  console.log("client connected");
-  socket.on("update", function (ops) {
-    for (var i = 0; i < ops.length; i++) {
-      peer.merge_op(docState, ops[i]);
-    }
-    broadcast();
-    console.log("update: " + JSON.stringify(ops) + ": " + docState.get_str());
+io.on("connection", (socket) => {
+  console.log("a user connected");
+  socket.emit("give-priority", priority);
+  priority = String.fromCharCode(priority.charCodeAt(0) + 1);
+  socket.on("insert-one", (charToInsert) => {
+    const kiTu = JSON.parse(charToInsert);
+    console.log("insert : ", kiTu);
+    socket.broadcast.emit("update-insert-one", charToInsert);
   });
-  socket.emit("update", docState.ops);
+  socket.on("delete-one", (charToDelete) => {
+    console.log("delete : ", JSON.parse(charToDelete));
+    socket.broadcast.emit("update-delete-one", charToDelete);
+  });
+  socket.on("modify-id", (idupdated) => {
+    console.log("update : ", JSON.parse(idupdated));
+    socket.broadcast.emit("update-modify-id", idupdated);
+  });
+  socket.on("disconnect", () => {
+    console.log("user disconnected");
+  });
 });
 server.listen(port, "0.0.0.0", () => {
   console.log(`Server running on port ${port}`);
