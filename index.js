@@ -17,9 +17,11 @@ io.on("connection", (socket) => {
   console.log("a user connected");
   socket.emit("give-priority", priority);
   priority = String.fromCharCode(priority.charCodeAt(0) + 1);
+  // Lắng nghe sự kiện 'chen 1 chu' từ client
   socket.on("insert-one", (charToInsert) => {
     const kiTu = JSON.parse(charToInsert);
     console.log("insert : ", kiTu);
+    //Gửi sự kiện 'chen 1 chu' tới tất cả các client khác ngoại trừ client hiện tại
     socket.broadcast.emit("update-insert-one", charToInsert);
   });
   socket.on("delete-one", (charToDelete) => {
