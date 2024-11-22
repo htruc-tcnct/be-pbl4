@@ -79,31 +79,32 @@ exports.get_documents_by_owner_id = (req, res, next) => {
     });
 };
 exports.get_by_document_id = (req, res, next) => {
-  const id = req.params.idDoc; // Lấy documentOwnerID từ params
-  Document.find({ _id: id }) // Tìm tất cả tài liệu theo documentOwnerID
+  const idDoc = req.params.idDoc;
+
+  Document.findById(idDoc) // Tìm một tài liệu theo _id
     .select(
       "documentTitle documentContent documentOwnerID isShared shareCode accessLevel currentVersionID createdAt updatedAt"
     )
     .exec()
-    .then((docs) => {
-      if (docs.length > 0) {
+    .then((doc) => {
+      if (doc) {
         res.status(200).json({
-          documents: docs,
-          request: docs.map((doc) => ({
+          document: doc,
+          request: {
             type: "GET",
-            url: `http://localhost:8000/documents/detail/${doc._id}`, // Provide URL for each document
-          })),
+            url: `http://localhost:8000/documents/detail/${doc._id}`, // Cung cấp URL cho tài liệu
+          },
         });
       } else {
         res.status(404).json({
-          id: ownerId || "haha", // If ownerId is missing, return a fallback value
-          message: "No documents found for this owner",
+          id: id, // Trả về `id` đã tìm
+          message: "No document found with this ID",
         });
       }
     })
     .catch((err) => {
       res.status(500).json({
-        message: "An error occurred while fetching documents",
+        message: "An error occurred while fetching the document",
         error: err,
       });
     });
