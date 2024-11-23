@@ -27,7 +27,6 @@ io.on("connection", (socket) => {
   console.log("a user connected");
   socket.emit("give-priority", priority);
   priority++;
-
   // Lắng nghe sự kiện 'chen 1 chu' từ client
   socket.on("insert-one", (charToInsert) => {
     const kiTu = JSON.parse(charToInsert);
@@ -50,6 +49,7 @@ io.on("connection", (socket) => {
   socket.on("request-edited-content", (idUserAndRoom) => {
     console.log("request edited content : ", JSON.parse(idUserAndRoom));
     const obIdRoomAndUser = JSON.parse(idUserAndRoom);
+    console.log(">>>>>>>>>>>>>>>>>>>>: ", obIdRoomAndUser);
     var checkFlag = false;
     var idCuaChuPhong;
     // kiểm tra nếu là yêu cầu của client khách thì mới gửi đi, còn nếu là của chủ phòng thì không
