@@ -4,10 +4,10 @@ const Permission = require("../../models/permissionSchema");
 const nodemailer = require("nodemailer");
 const mongoose = require("mongoose");
 const fs = require("fs");
+const mammoth = require("mammoth");
 const path = require("path");
 const { google } = require("googleapis");
 const passport = require("passport");
-const mammoth = require("mammoth");
 const multer = require("multer");
 const OAuth2 = google.auth.OAuth2;
 const oAuth2Client = new google.auth.OAuth2(
@@ -50,52 +50,6 @@ exports.get_all_documents = (req, res, next) => {
       res.status(500).json({ error: err });
     });
 };
-exports.get_by_document_id = async (req, res) => {
-  const idDoc = req.params.idDoc;
-
-  try {
-    const doc = await Document.findById(idDoc).select(
-      "documentTitle documentPath documentOwnerID isShared shareCode accessLevel currentVersionID createdAt updatedAt"
-    );
-
-    if (!doc) {
-      return res
-        .status(404)
-        .json({ message: "No document found with this ID" });
-    }
-
-    const documentPath = doc.documentPath;
-    if (!fs.existsSync(documentPath)) {
-      return res
-        .status(404)
-        .json({ message: `File not found at path: ${documentPath}` });
-    }
-
-    const fileBuffer = fs.readFileSync(documentPath);
-    const result = await mammoth.convertToHtml({ buffer: fileBuffer });
-
-    res.status(200).json({
-      document: {
-        title: doc.documentTitle,
-        owner: doc.documentOwnerID,
-        isShared: doc.isShared,
-        content: result.value,
-        metadata: {
-          shareCode: doc.shareCode,
-          accessLevel: doc.accessLevel,
-          createdAt: doc.createdAt,
-          updatedAt: doc.updatedAt,
-        },
-      },
-    });
-  } catch (error) {
-    console.error("Error fetching document:", error);
-    res.status(500).json({
-      message: "An error occurred while fetching the document",
-      error,
-    });
-  }
-};
 exports.get_documents_by_owner_id = (req, res, next) => {
   const ownerId = req.params.ownerId; // Lấy documentOwnerID từ params
   Document.find({ documentOwnerID: ownerId }) // Tìm tất cả tài liệu theo documentOwnerID
@@ -126,7 +80,76 @@ exports.get_documents_by_owner_id = (req, res, next) => {
       });
     });
 };
+exports.get_by_document_id = (req, res, next) => {
+  const idDoc = req.params.idDoc;
 
+  Document.findById(idDoc) // Tìm một tài liệu theo _id
+    .select(
+      "documentTitle documentOwnerID isShared shareCode accessLevel currentVersionID createdAt updatedAt"
+    )
+    .exec()
+    .then((doc) => {
+      if (doc) {
+        res.status(200).json({
+          document: doc,
+          request: {
+            type: "GET",
+            url: `http://localhost:8000/documents/detail/${doc._id}`, // Cung cấp URL cho tài liệu
+          },
+        });
+      } else {
+        res.status(404).json({
+          id: id, // Trả về `id` đã tìm
+          message: "No document found with this ID",
+        });
+      }
+    })
+    .catch((err) => {
+      res.status(500).json({
+        message: "An error occurred while fetching the document",
+        error: err,
+      });
+    });
+};
+exports.get_file_by_document_id = async (req, res) => {
+  const idDoc = req.params.idDoc;
+
+  try {
+    // Tìm tài liệu theo ID
+    const doc = await Document.findById(idDoc).select(
+      "documentTitle documentPath documentOwnerID isShared shareCode accessLevel currentVersionID createdAt updatedAt"
+    );
+
+    if (!doc) {
+      return res
+        .status(404)
+        .json({ message: "No document found with this ID" });
+    }
+
+    const documentPath = doc.documentPath;
+
+    // Kiểm tra xem file có tồn tại không
+    if (!fs.existsSync(documentPath)) {
+      return res
+        .status(404)
+        .json({ message: `File not found at path: ${documentPath}` });
+    }
+
+    // Sử dụng `res.sendFile` để gửi file cho client
+    res.sendFile(path.resolve(documentPath), (err) => {
+      if (err) {
+        console.error("Error sending file:", err);
+        res.status(500).json({ message: "Error sending file", error: err });
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching document:", error);
+    res.status(500).json({
+      message: "An error occurred while fetching the document",
+      error,
+    });
+  }
+};
 exports.create_document = async (req, res) => {
   try {
     // Kiểm tra nếu `documentTitle` không tồn tại

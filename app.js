@@ -22,6 +22,7 @@ const corsOptions = {
   origin: [
     "http://localhost:5173",
     "http://10.10.29.144:5173",
+    "http://172.21.0.78:5173",
     "https://fe-pbl4-ytsx.vercel.app",
   ],
   credentials: true,
