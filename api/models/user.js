@@ -10,7 +10,13 @@ const userSchema = new mongoose.Schema({
     required: [true, "Email is required"],
     unique: true,
   },
+  accountId: {
+    type: String,
+  },
   password: {
+    type: String,
+  },
+  provider: {
     type: String,
   },
   dateOfBirth: {

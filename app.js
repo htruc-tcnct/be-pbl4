@@ -11,6 +11,9 @@ const userRoutes = require("./api/routes/user");
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const passport = require("passport");
+const cookieParser = require("cookie-parser");
+app.use(cookieParser());
+
 const authRouter = require("./api/controller/user/auth");
 const documentRoutes = require("./api/routes/document");
 connectDB();
@@ -37,9 +40,9 @@ app.use(
     cookie: {
       httpOnly: true,
       priority: "high",
-      // secure: false, //chay local
-      secure: true, //chay deploy
-      sameSite: "none", //chay deploy
+      secure: false, //chay local
+      // secure: true, //chay deploy
+      // sameSite: "none", //chay deploy
       maxAge: 24 * 60 * 60 * 1000,
     },
   })

@@ -123,23 +123,14 @@ exports.login = (req, res, next) => {
         .status(401)
         .json({ message: "Auth failed", detail: "Invalid email or password" });
     }
-
     req.login(user, (err) => {
       if (err) {
         return res.status(500).json({ message: "Login failed", error: err });
       }
-
-      req.session.save((err) => {
-        if (err) {
-          return res
-            .status(500)
-            .json({ message: "Session save failed", error: err });
-        }
-        console.log("Auth successfull");
-        res.status(200).json({
-          message: "Auth successful",
-          user: { id: user._id, email: user.email, name: user.name },
-        });
+      // Send a response indicating successful login
+      res.status(200).json({
+        message: "Auth successful",
+        user: { id: user._id, email: user.email, name: user.name },
       });
     });
   })(req, res, next);
