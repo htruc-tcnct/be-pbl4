@@ -1,11 +1,9 @@
 const http = require("http");
 const app = require("./app");
-const _ = require("lodash");
-const DocumentVersion = require("./api/models/documentVersion");
 const port = process.env.PORT || 5000;
 const server = http.createServer(app);
 const { Server } = require("socket.io");
-const { json } = require("body-parser");
+
 const io = new Server(server, {
   cors: {
     origin: [
@@ -16,39 +14,24 @@ const io = new Server(server, {
     credentials: true,
   },
 });
-async function saveDocumentVersion(
-  documentId,
-  versionNumber,
-  changedBy,
-  versionContent,
-  content
-) {
-  try {
-    const newVersion = new DocumentVersion({
-      documentID,
-      versionNumber,
-      versionContent,
-      content,
-      changedBy,
-      isRestored: true,
-    });
-    await newVersion.save();
-    console.log("Document version saved to MongoDB");
-  } catch (err) {
-    console.error("Error saving document version: ", err);
-  }
-}
-const doubouncedSave = _.debounce(saveDocumentVersion, 5000);
-
-var priority = "A";
+const idRoomAndOwner = [
+  {
+    idOwner: "1",
+    idDoc: "1",
+  },
+  ``,
+];
+var priority = 1;
 
 io.on("connection", (socket) => {
   console.log("a user connected");
   socket.emit("give-priority", priority);
-  priority = String.fromCharCode(priority.charCodeAt(0) + 1);
+  priority++;
+  // Lắng nghe sự kiện 'chen 1 chu' từ client
   socket.on("insert-one", (charToInsert) => {
     const kiTu = JSON.parse(charToInsert);
     console.log("insert : ", kiTu);
+    //Gửi sự kiện 'chen 1 chu' tới tất cả các client khác ngoại trừ client hiện tại
     socket.broadcast.emit("update-insert-one", charToInsert);
   });
   socket.on("delete-one", (charToDelete) => {
@@ -62,6 +45,34 @@ io.on("connection", (socket) => {
   socket.on("update-style", (divStyle) => {
     console.log("update style : ", JSON.parse(divStyle));
     socket.broadcast.emit("update-modify-style", divStyle);
+  });
+  socket.on("request-edited-content", (idUserAndRoom) => {
+    console.log("request edited content : ", JSON.parse(idUserAndRoom));
+    const obIdRoomAndUser = JSON.parse(idUserAndRoom);
+    var checkFlag = false;
+    var idCuaChuPhong;
+    // kiểm tra nếu là yêu cầu của client khách thì mới gửi đi, còn nếu là của chủ phòng thì không
+    idRoomAndOwner.forEach((element) => {
+      if (
+        element.idDoc == obIdRoomAndUser.idDoc &&
+        element.idOwner == obIdRoomAndUser.idUser
+      ) {
+        checkFlag = true;
+      } else {
+        if (element.idDoc == obIdRoomAndUser.idDoc) {
+          idCuaChuPhong = element.idOwner;
+        }
+      }
+    });
+    if (checkFlag == false) {
+      console.log("gửi yêu cầu cập nhật");
+      obIdRoomAndUser.idOwner = Number(idCuaChuPhong);
+      console.log("id chủ phòng ", obIdRoomAndUser);
+      socket.broadcast.emit(
+        "send-content-to-new-Client",
+        JSON.stringify(obIdRoomAndUser)
+      );
+    }
   });
   socket.on("disconnect", () => {
     console.log("user disconnected");

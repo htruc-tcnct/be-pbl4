@@ -5,8 +5,9 @@ const documentSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  documentContent: {
+  documentPath: {
     type: String,
+    required: true,
   },
   documentOwnerID: {
     type: mongoose.Schema.Types.ObjectId,
@@ -47,11 +48,6 @@ const documentSchema = new mongoose.Schema({
     default: Date.now,
   },
 });
-
-// documentSchema.pre("save", function (next) {
-//   this.updatedAt = Date.now();
-//   next();
-// });
 
 documentSchema.pre("save", function (next) {
   if (this.isShared && !this.shareCode) {

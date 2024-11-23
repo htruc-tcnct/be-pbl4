@@ -3,9 +3,11 @@ const DocumentVersion = require("../../models/documentVersion");
 const Permission = require("../../models/permissionSchema");
 const nodemailer = require("nodemailer");
 const mongoose = require("mongoose");
-
+const fs = require("fs");
+const path = require("path");
 const { google } = require("googleapis");
 const passport = require("passport");
+const mammoth = require("mammoth");
 const multer = require("multer");
 const OAuth2 = google.auth.OAuth2;
 const oAuth2Client = new google.auth.OAuth2(
@@ -48,6 +50,52 @@ exports.get_all_documents = (req, res, next) => {
       res.status(500).json({ error: err });
     });
 };
+exports.get_by_document_id = async (req, res) => {
+  const idDoc = req.params.idDoc;
+
+  try {
+    const doc = await Document.findById(idDoc).select(
+      "documentTitle documentPath documentOwnerID isShared shareCode accessLevel currentVersionID createdAt updatedAt"
+    );
+
+    if (!doc) {
+      return res
+        .status(404)
+        .json({ message: "No document found with this ID" });
+    }
+
+    const documentPath = doc.documentPath;
+    if (!fs.existsSync(documentPath)) {
+      return res
+        .status(404)
+        .json({ message: `File not found at path: ${documentPath}` });
+    }
+
+    const fileBuffer = fs.readFileSync(documentPath);
+    const result = await mammoth.convertToHtml({ buffer: fileBuffer });
+
+    res.status(200).json({
+      document: {
+        title: doc.documentTitle,
+        owner: doc.documentOwnerID,
+        isShared: doc.isShared,
+        content: result.value,
+        metadata: {
+          shareCode: doc.shareCode,
+          accessLevel: doc.accessLevel,
+          createdAt: doc.createdAt,
+          updatedAt: doc.updatedAt,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching document:", error);
+    res.status(500).json({
+      message: "An error occurred while fetching the document",
+      error,
+    });
+  }
+};
 exports.get_documents_by_owner_id = (req, res, next) => {
   const ownerId = req.params.ownerId; // Lấy documentOwnerID từ params
   Document.find({ documentOwnerID: ownerId }) // Tìm tất cả tài liệu theo documentOwnerID
@@ -78,89 +126,48 @@ exports.get_documents_by_owner_id = (req, res, next) => {
       });
     });
 };
-exports.get_by_document_id = (req, res, next) => {
-  const idDoc = req.params.idDoc;
 
-  Document.findById(idDoc) // Tìm một tài liệu theo _id
-    .select(
-      "documentTitle documentContent documentOwnerID isShared shareCode accessLevel currentVersionID createdAt updatedAt"
-    )
-    .exec()
-    .then((doc) => {
-      if (doc) {
-        res.status(200).json({
-          document: doc,
-          request: {
-            type: "GET",
-            url: `http://localhost:8000/documents/detail/${doc._id}`, // Cung cấp URL cho tài liệu
-          },
-        });
-      } else {
-        res.status(404).json({
-          id: id, // Trả về `id` đã tìm
-          message: "No document found with this ID",
-        });
-      }
-    })
-    .catch((err) => {
-      res.status(500).json({
-        message: "An error occurred while fetching the document",
-        error: err,
-      });
-    });
-};
-
-// Hàm tạo tài liệu
 exports.create_document = async (req, res) => {
   try {
-    // Kiểm tra xem documentOwnerID có hợp lệ không
-    if (
-      !req.body.documentOwnerID ||
-      !mongoose.Types.ObjectId.isValid(req.body.documentOwnerID)
-    ) {
-      return res.status(400).json({ message: "Invalid documentOwnerID" });
+    // Kiểm tra nếu `documentTitle` không tồn tại
+    if (!req.body.documentTitle) {
+      return res.status(400).json({ message: "Document title is required." });
+    }
+
+    const documentTitle = req.body.documentTitle.replace(/\s+/g, "_");
+    const documentId = new mongoose.Types.ObjectId();
+    const newDocumentPath = path.join(
+      "D:\\",
+      `${documentTitle}_${documentId}.docx`
+    );
+
+    // Xử lý file tải lên
+    if (req.file) {
+      const uploadedFilePath = req.file.path;
+      fs.copyFileSync(uploadedFilePath, newDocumentPath);
+      fs.unlinkSync(uploadedFilePath);
+    } else {
+      fs.writeFileSync(newDocumentPath, "", "utf-8");
     }
 
     const document = new Document({
+      _id: documentId,
       documentTitle: req.body.documentTitle,
-      documentContent: req.body.documentContent,
+      documentPath: newDocumentPath,
       documentOwnerID: req.body.documentOwnerID,
       isShared: req.body.isShared || false,
       shareCode: req.body.shareCode || generateShareCode(),
       accessLevel: req.body.accessLevel || "Restricted",
-      currentVersionID: null, // Sẽ cập nhật sau khi tạo phiên bản
     });
+
     const savedDocument = await document.save();
 
-    const firstVersion = new DocumentVersion({
-      documentID: savedDocument._id,
-      versionNumber: 1, // Phiên bản đầu tiên
-      changedBy: req.body.documentOwnerID, // Người tạo
-      versionContent: req.body.documentContent, // Nội dung tài liệu
-    });
-
-    const savedVersion = await firstVersion.save();
-
-    savedDocument.currentVersionID = savedVersion._id;
-    await savedDocument.save();
-
-    const ownerPermission = new Permission({
-      userID: req.body.documentOwnerID,
-      documentID: savedDocument._id,
-      role: "Edit",
-    });
-
-    // Lưu quyền
-    await ownerPermission.save();
-
-    // Phản hồi với thông tin tài liệu và phiên bản
     res.status(201).json({
-      message: "Document and permission created successfully",
+      message: "Document created successfully",
       document: savedDocument,
-      version: savedVersion,
-      permission: ownerPermission,
     });
   } catch (error) {
+    console.error("Error creating document:", error);
     res.status(500).json({ message: "Error creating document", error });
   }
 };

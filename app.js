@@ -5,6 +5,7 @@ require("dotenv").config();
 require("./api/controller/user/passport");
 const morgan = require("morgan");
 const bodyParser = require("body-parser");
+const multer = require("multer");
 const mongoose = require("mongoose");
 const connectDB = require("./api/config/db");
 const userRoutes = require("./api/routes/user");
@@ -52,6 +53,12 @@ app.use(
 app.set("trust proxy", true);
 app.use(passport.initialize());
 app.use(passport.session());
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => cb(null, "uploads/"),
+    filename: (req, file, cb) => cb(null, `${Date.now()}_${file.originalname}`),
+  }),
+});
 
 app.use(morgan("dev"));
 app.use(bodyParser.urlencoded({ extended: false }));
