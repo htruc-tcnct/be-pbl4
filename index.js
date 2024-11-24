@@ -16,6 +16,7 @@ const io = new Server(server, {
 });
 var idRoomAndOwner;
 var priority = 1;
+let idChuPhong;
 io.on("connection", (socket) => {
   idRoomAndOwner = [];
   console.log("a user connected");
@@ -35,6 +36,7 @@ io.on("connection", (socket) => {
         idDoc: data.documentId,
         priority: 1,
       });
+      idChuPhong = data.userId;
     } else {
       console.log("Duplicate data. Skipping...");
     }
@@ -64,7 +66,7 @@ io.on("connection", (socket) => {
   socket.on("request-edited-content", (idUserAndRoom) => {
     // console.log("request edited content : ", JSON.parse(idUserAndRoom));
     const obIdRoomAndUser = JSON.parse(idUserAndRoom);
-    // // console.log(">>>>>>>>>>>>>>>>>>>>: ", obIdRoomAndUser);
+    // console.log(">>>>>>>>>>>>>>>>>>>>: ", obIdRoomAndUser);
     var checkFlag = false;
     var idCuaChuPhong;
     idRoomAndOwner.idDoc =
@@ -82,13 +84,15 @@ io.on("connection", (socket) => {
         }
       });
     if (checkFlag == false) {
+      console.log("DAY NEF: ", idChuPhong);
       // console.log("gửi yêu cầu cập nhật");
-      obIdRoomAndUser.idOwner = Number(idCuaChuPhong);
-      // console.log("id chủ phòng ", obIdRoomAndUser);
+      obIdRoomAndUser.idOwner = idChuPhong;
+      console.log("id chủ phòng ", obIdRoomAndUser);
       socket.broadcast.emit(
         "send-content-to-new-Client",
         JSON.stringify(obIdRoomAndUser)
       );
+      checkFlag = true;
     }
   });
   socket.on("disconnect", () => {
