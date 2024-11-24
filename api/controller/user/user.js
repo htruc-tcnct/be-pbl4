@@ -68,7 +68,7 @@ exports.get_by_id = (req, res, next) => {
 };
 
 exports.create_user = (req, res, next) => {
-  console.log("Request Body:", req.body); // Log request body
+  // console.log("Request Body:", req.body); // Log request body
 
   User.find({ email: req.body.email })
     .exec()
@@ -102,14 +102,14 @@ exports.create_user = (req, res, next) => {
               })
               .catch((err) => {
                 res.status(500).json({ error: err });
-                console.log(err);
+                // console.log(err);
               });
           }
         });
       }
     })
     .catch((err) => {
-      console.log(err);
+      // console.log(err);
       res.status(500).json({ err: err });
     });
 };
@@ -150,7 +150,7 @@ exports.logout = (req, res, next) => {
       }
 
       res.clearCookie("connect.sid"); // Clear the session cookie
-      console.log("User logged out and session destroyed successfully");
+      // console.log("User logged out and session destroyed successfully");
       return res.status(200).json({ message: "Logged out successfully" });
     });
   });
@@ -192,7 +192,7 @@ exports.logout = (req, res, next) => {
 //       }
 //     })
 //     .catch((err) => {
-//       console.log(err);
+// //       console.log(err);
 //       res.status(500).json({ err: err });
 //     });
 // };
@@ -207,7 +207,7 @@ exports.delete_user = (req, res, next) => {
     )
     .catch((err) => {
       res.status(500).json({ error: err });
-      console.log(err);
+      // console.log(err);
     });
 };
 
@@ -320,13 +320,13 @@ exports.forgot_password = (req, res) => {
 
           transporter.sendMail(mailOptions, function (error, info) {
             if (error) {
-              console.log(error);
+              // console.log(error);
             } else {
-              console.log("Email sent: " + info.response);
+              // console.log("Email sent: " + info.response);
             }
           });
         } catch (err) {
-          console.log(err);
+          // console.log(err);
         }
         // You should send the response back to the client with a success message or instructions.
         res.status(200).json({
@@ -394,7 +394,7 @@ exports.upload_img = (req, res) => {
 
   User.updateOne({ email: email }, { avatar: imagePath })
     .then((result) => {
-      console.log("Cập nhật thành công:", result);
+      // console.log("Cập nhật thành công:", result);
     })
     .catch((error) => {
       console.error("Lỗi khi cập nhật:", error);

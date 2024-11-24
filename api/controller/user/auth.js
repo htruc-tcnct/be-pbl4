@@ -13,7 +13,7 @@ passport.use(
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        console.log("Google Profile:", profile); // Debug: Log Google profile
+        // console.log("Google Profile:", profile); // Debug: Log Google profile
 
         // Find user by email
         let user = await User.findOne({ email: profile.emails[0].value });
@@ -29,11 +29,11 @@ passport.use(
           });
 
           await newUser.save(); // Save the new user to the database
-          console.log("New Google user created:", newUser);
+          // console.log("New Google user created:", newUser);
 
           user = newUser; // Assign the new user to `user` for further processing
         } else {
-          console.log("Existing Google user found:", user);
+          // console.log("Existing Google user found:", user);
         }
 
         // Pass the user to the done callback
@@ -82,7 +82,7 @@ router.get(
     failureRedirect: `${process.env.CLIENT_URL}`, // Chuyển hướng khi thất bại
   }),
   (req, res) => {
-    console.log("Authenticated User:", req.user); // Kiểm tra thông tin người dùng
+    // console.log("Authenticated User:", req.user); // Kiểm tra thông tin người dùng
     res.redirect(`${process.env.CLIENT_URL}/home`); // Chuyển hướng sau khi thành công
   }
 );
