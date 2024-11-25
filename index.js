@@ -9,7 +9,7 @@ const io = new Server(server, {
   cors: {
     origin: [
       "http://localhost:5173",
-      "http://10.10.1.129:5173",
+      "http://10.10.3.68:5173",
       "https://fe-pbl4-ytsx.vercel.app",
     ],
     credentials: true,
@@ -20,18 +20,21 @@ var priority = 1;
 idRoomAndOwner = [];
 io.on("connection", (socket) => {
   console.log("a user connected");
-  socket.emit("give-priority", priority);
-  priority++;
-  socket.on("register", (data) => {
-    console.log("Received registration data: ", data);
-
+  socket.on("register", (data, callback) => {
+    const dulieu = JSON.parse(data);
+    console.log("Received registration data: ", dulieu);
+    if (dulieu.ownerId != dulieu.userId) {
+      console.log("không phải chủ phòng, không tạo thêm phòng");
+      callback("không phải chủ phòng");
+      return;
+    }
     // Kiểm tra dữ liệu đã tồn tại hay chưa
     var exists = false;
     if (idRoomAndOwner.length != 0) {
       idRoomAndOwner.forEach(function (element, index, array) {
         if (
-          element.idOwner === data.userId &&
-          element.idDoc === data.documentId
+          element.idOwner === dulieu.ownerId &&
+          element.idDoc === dulieu.documentId
         ) {
           exists = true;
         }
@@ -41,16 +44,31 @@ io.on("connection", (socket) => {
     }
     if (exists == false) {
       idRoomAndOwner.push({
-        idOwner: data.userId,
-        idDoc: data.documentId,
+        idOwner: dulieu.userId,
+        idDoc: dulieu.documentId,
         priority: 1,
       });
     } else {
       console.log("Duplicate data. Skipping...");
     }
-    console.log("Updated List: ", idRoomAndOwner);
+    console.log("List phòng: ", idRoomAndOwner);
+    callback("bạn là chủ phòng");
   });
-
+  socket.on("request-priority", (idUserAndIdDocument) => {
+    const UserAndDoc = JSON.parse(idUserAndIdDocument);
+    console.log("request-priority UserAndDoc : ", UserAndDoc);
+    idRoomAndOwner.forEach((element) => {
+      if (element.idDoc == UserAndDoc.idDoc) {
+        socket.emit("give-priority", element.priority);
+        console.log("độ ưu tiên ", element.priority);
+        element.priority++;
+        // if (element.idOwner == UserAndDoc.idUser) {
+        //   console.log("tắt cờ chủ phòng", UserAndDoc.idUser);
+        //   socket.emit("endupdating", JSON.stringify(UserAndDoc.idUser));
+        // }
+      }
+    });
+  });
   // Lắng nghe sự kiện 'chen 1 chu' từ client
   socket.on("insert-one", (charToInsert) => {
     const kiTu = JSON.parse(charToInsert);
