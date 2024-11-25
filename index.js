@@ -24,7 +24,7 @@ io.on("connection", (socket) => {
     const dulieu = JSON.parse(data);
     console.log("Received registration data: ", dulieu);
     if (dulieu.ownerId != dulieu.userId) {
-      console.log("không phải chủ phòng, không tạo thêm phòng");
+      console.log("không phải chủ phòn cg, không tạo thêm phòng");
       callback("không phải chủ phòng");
       return;
     }
@@ -54,6 +54,7 @@ io.on("connection", (socket) => {
     console.log("List phòng: ", idRoomAndOwner);
     callback("bạn là chủ phòng");
   });
+
   socket.on("request-priority", (idUserAndIdDocument) => {
     const UserAndDoc = JSON.parse(idUserAndIdDocument);
     console.log("request-priority UserAndDoc : ", UserAndDoc);
@@ -90,33 +91,40 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("update-modify-style", divStyle);
   });
   socket.on("request-edited-content", (idUserAndRoom) => {
-    console.log("request edited content : ", JSON.parse(idUserAndRoom));
     const obIdRoomAndUser = JSON.parse(idUserAndRoom);
-    // // console.log(">>>>>>>>>>>>>>>>>>>>: ", obIdRoomAndUser);
-    var checkFlag = false;
+    var checkFlag = false; // Kiểm tra nếu yêu cầu đến từ chủ phòng
     var idCuaChuPhong;
-    // kiểm tra nếu là yêu cầu của client khách thì mới gửi đi, còn nếu là của chủ phòng thì không
-    idRoomAndOwner.forEach((element) => {
+    var checkIsSent = false; // Kiểm tra nếu dữ liệu đã được gửi
+
+    for (let i = 0; i < idRoomAndOwner.length; i++) {
+      const element = idRoomAndOwner[i];
+
       if (
-        element.idDoc == obIdRoomAndUser.idDoc &&
-        element.idOwner == obIdRoomAndUser.idUser
+        element.idDoc === obIdRoomAndUser.idDoc &&
+        element.idOwner === obIdRoomAndUser.idUser
       ) {
-        checkFlag = true;
-      } else {
-        if (element.idDoc == obIdRoomAndUser.idDoc) {
-          idCuaChuPhong = element.idOwner;
-        }
+        checkFlag = true; // Đây là chủ phòng
+        break; // Thoát vòng lặp, không cần kiểm tra thêm
       }
-    });
-    if (checkFlag == false) {
-      console.log("gửi yêu cầu cập nhật");
-      obIdRoomAndUser.idOwner = idCuaChuPhong;
-      socket.broadcast.emit(
-        "send-content-to-new-Client",
-        JSON.stringify(obIdRoomAndUser)
-      );
+
+      if (element.idDoc === obIdRoomAndUser.idDoc && checkIsSent === false) {
+        console.log("element: >>>>>>>>>>>>>>>>>>>>>>>>>: ", element);
+
+        idCuaChuPhong = element.idOwner;
+        obIdRoomAndUser.idOwner = idCuaChuPhong;
+
+        // Gửi nội dung tới client mới
+        socket.broadcast.emit(
+          "send-content-to-new-Client",
+          JSON.stringify(obIdRoomAndUser)
+        );
+
+        checkIsSent = true; // Đánh dấu đã gửi
+        break; // Thoát vòng lặp sau khi gửi
+      }
     }
   });
+
   socket.on("disconnect", () => {
     console.log("user disconnected");
   });
