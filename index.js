@@ -3,6 +3,7 @@ const app = require("./app");
 const port = process.env.PORT || 5000;
 const server = http.createServer(app);
 const { Server } = require("socket.io");
+const { forEach } = require("lodash");
 
 const io = new Server(server, {
   cors: {
@@ -16,8 +17,8 @@ const io = new Server(server, {
 });
 var idRoomAndOwner;
 var priority = 1;
+idRoomAndOwner = [];
 io.on("connection", (socket) => {
-  idRoomAndOwner = [];
   console.log("a user connected");
   socket.emit("give-priority", priority);
   priority++;
@@ -25,11 +26,20 @@ io.on("connection", (socket) => {
     console.log("Received registration data: ", data);
 
     // Kiểm tra dữ liệu đã tồn tại hay chưa
-    const exists = idRoomAndOwner.some(
-      (item) => item.idOwner === data.userId && item.idDoc === data.documentId
-    );
-
-    if (!exists) {
+    var exists = false;
+    if (idRoomAndOwner.length != 0) {
+      idRoomAndOwner.forEach(function (element, index, array) {
+        if (
+          element.idOwner === data.userId &&
+          element.idDoc === data.documentId
+        ) {
+          exists = true;
+        }
+      });
+    } else {
+      console.log("idRoomAndOwner.length = 0");
+    }
+    if (exists == false) {
       idRoomAndOwner.push({
         idOwner: data.userId,
         idDoc: data.documentId,
@@ -62,29 +72,27 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("update-modify-style", divStyle);
   });
   socket.on("request-edited-content", (idUserAndRoom) => {
-    // console.log("request edited content : ", JSON.parse(idUserAndRoom));
+    console.log("request edited content : ", JSON.parse(idUserAndRoom));
     const obIdRoomAndUser = JSON.parse(idUserAndRoom);
     // // console.log(">>>>>>>>>>>>>>>>>>>>: ", obIdRoomAndUser);
     var checkFlag = false;
     var idCuaChuPhong;
-    idRoomAndOwner.idDoc =
-      // kiểm tra nếu là yêu cầu của client khách thì mới gửi đi, còn nếu là của chủ phòng thì không
-      idRoomAndOwner.forEach((element) => {
-        if (
-          element.idDoc == obIdRoomAndUser.idDoc &&
-          element.idOwner == obIdRoomAndUser.idUser
-        ) {
-          checkFlag = true;
-        } else {
-          if (element.idDoc == obIdRoomAndUser.idDoc) {
-            idCuaChuPhong = element.idOwner;
-          }
+    // kiểm tra nếu là yêu cầu của client khách thì mới gửi đi, còn nếu là của chủ phòng thì không
+    idRoomAndOwner.forEach((element) => {
+      if (
+        element.idDoc == obIdRoomAndUser.idDoc &&
+        element.idOwner == obIdRoomAndUser.idUser
+      ) {
+        checkFlag = true;
+      } else {
+        if (element.idDoc == obIdRoomAndUser.idDoc) {
+          idCuaChuPhong = element.idOwner;
         }
-      });
+      }
+    });
     if (checkFlag == false) {
-      // console.log("gửi yêu cầu cập nhật");
-      obIdRoomAndUser.idOwner = Number(idCuaChuPhong);
-      // console.log("id chủ phòng ", obIdRoomAndUser);
+      console.log("gửi yêu cầu cập nhật");
+      obIdRoomAndUser.idOwner = idCuaChuPhong;
       socket.broadcast.emit(
         "send-content-to-new-Client",
         JSON.stringify(obIdRoomAndUser)
@@ -92,7 +100,7 @@ io.on("connection", (socket) => {
     }
   });
   socket.on("disconnect", () => {
-    // console.log("user disconnected");
+    console.log("user disconnected");
   });
 });
 server.listen(port, "0.0.0.0", () => {
