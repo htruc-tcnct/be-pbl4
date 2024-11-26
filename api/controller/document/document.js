@@ -85,7 +85,7 @@ exports.get_by_document_id = (req, res, next) => {
 
   Document.findById(idDoc) // Tìm một tài liệu theo _id
     .select(
-      "documentTitle documentOwnerID isShared shareCode accessLevel currentVersionID createdAt updatedAt"
+      "documentTitle documentPath documentOwnerID isShared shareCode accessLevel currentVersionID createdAt updatedAt"
     )
     .exec()
     .then((doc) => {
