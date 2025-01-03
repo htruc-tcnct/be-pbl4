@@ -407,7 +407,7 @@ exports.share_Document_with_email = async (req, res) => {
       <p>Chào bạn,</p>
       <p>Doc Sync đã chia sẻ một tài liệu với bạn. Bạn có thể truy cập tài liệu bằng cách nhấp vào liên kết dưới đây:</p>
       <p>
-        <a href="${link}" style="background-color: #4CAF50; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px;">Mở Tài Liệu</a>
+        <a href="${link}" target="_blank" style="background-color: #4CAF50; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px;">Mở Tài Liệu</a>
       </p>
       <p>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!</p>
       <footer style="margin-top: 20px; font-size: 12px; color: #777;">
