@@ -21,7 +21,7 @@ connectDB();
 const corsOptions = {
   origin: [
     "http://localhost:5173",
-    "http://10.10.29.159:5173",
+    `${process.env.CLIENT_URL}`,
     "http://192.168.1.7:5173",
     "https://fe-pbl4-ytsx.vercel.app",
   ],
@@ -32,7 +32,6 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 app.options("*", cors(corsOptions));
-
 app.use(
   session({
     secret: "keyboard cat",
@@ -42,9 +41,8 @@ app.use(
     cookie: {
       httpOnly: true,
       priority: "high",
-      secure: false, //chay local
-      // secure: true, //chay deploy
-      // sameSite: "none", //chay deploy
+      secure: process.env.NODE_ENV === "production", // Chỉ bật secure khi deploy
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Chỉ bật sameSite none khi deploy
       maxAge: 24 * 60 * 60 * 1000,
     },
   })

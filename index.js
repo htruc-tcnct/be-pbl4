@@ -10,7 +10,7 @@ const io = new Server(server, {
   cors: {
     origin: [
       "http://localhost:5173",
-      "http://192.168.1.7:5173",
+      `${process.env.CLIENT_URL}`,
       "https://fe-pbl4-ytsx.vercel.app",
     ],
     credentials: true,

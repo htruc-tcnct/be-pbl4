@@ -39,7 +39,7 @@ exports.get_all_documents = (req, res, next) => {
             updatedAt: doc.updatedAt,
             request: {
               type: "GET",
-              url: "http://localhost:8000/documents/" + doc._id,
+              url: `${process.env.CLIENT_URL}/documents/` + doc._id,
             },
           };
         }),
@@ -63,7 +63,7 @@ exports.get_documents_by_owner_id = (req, res, next) => {
           documents: docs,
           request: docs.map((doc) => ({
             type: "GET",
-            url: `http://localhost:8000/documents/${doc._id}`, // Provide URL for each document
+            url: `${process.env.CLIENT_URL}/documents/${doc._id}`, // Provide URL for each document
           })),
         });
       } else {
@@ -94,7 +94,7 @@ exports.get_by_document_id = (req, res, next) => {
           document: doc,
           request: {
             type: "GET",
-            url: `http://localhost:8000/documents/detail/${doc._id}`, // Cung cấp URL cho tài liệu
+            url: `${process.env.CLIENT_URL}/documents/detail/${doc._id}`, // Cung cấp URL cho tài liệu
           },
         });
       } else {
@@ -231,7 +231,7 @@ exports.update_document = (req, res, next) => {
         updatedDocument,
         request: {
           type: "GET",
-          url: "http://localhost:8000/documents/" + id,
+          url: `${process.env.CLIENT_URL}/documents/` + id,
         },
       });
     })
@@ -250,7 +250,7 @@ exports.delete_document = (req, res, next) => {
         message: "Document deleted",
         request: {
           type: "POST",
-          url: "http://localhost:8000/documents",
+          url: `${process.env.CLIENT_URL}/documents`,
           body: {
             documentTitle: "String",
             documentContent: "String",
@@ -343,7 +343,7 @@ exports.on_share_code = async (req, res) => {
         document,
         request: {
           type: "GET",
-          url: `http://localhost:8000/documents/detail/${document._id}`,
+          url: `${process.env.CLIENT_URL}/documents/detail/${document._id}`,
         },
       });
     }
@@ -362,7 +362,7 @@ exports.on_share_code = async (req, res) => {
       document,
       request: {
         type: "GET",
-        url: `http://localhost:8000/documents/detail/${document._id}`,
+        url: `${process.env.CLIENT_URL}/documents/detail/${document._id}`,
       },
     });
   } catch (error) {
