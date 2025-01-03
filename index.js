@@ -64,10 +64,10 @@ io.on("connection", (socket) => {
         socket.emit("give-priority", element.priority);
         // console.log("độ ưu tiên ", element.priority);
         element.priority++;
-        // if (element.idOwner == UserAndDoc.idUser) {
-        //   console.log("tắt cờ chủ phòng", UserAndDoc.idUser);
-        //   socket.emit("endupdating", JSON.stringify(UserAndDoc.idUser));
-        // }
+        if (element.idOwner == UserAndDoc.idUser) {
+          console.log("tắt cờ chủ phòng", UserAndDoc.idUser);
+          socket.emit("endupdating", JSON.stringify(UserAndDoc.idUser));
+        }
       }
     });
   });
@@ -159,7 +159,19 @@ io.on("connection", (socket) => {
       console.error("Received data is not a valid ArrayBuffer or Buffer.");
     }
   });
-
+  // gửi cho client biết để bật cờ updatingFlag
+  socket.on("is-updating", (idNewClient, callback) => {
+    console.log("is updating : ", JSON.parse(idNewClient));
+    socket.broadcast.emit("updating", idNewClient, (response) => {
+      // Sau khi xử lý xong, gọi callback để thông báo cho client
+      callback("Update successful!");
+    });
+  });
+  // gửi cho client biết để tắt cờ updatingFlag
+  socket.on("end-updating", (idNewClient) => {
+    console.log("end updating : ", JSON.parse(idNewClient));
+    socket.broadcast.emit("endupdating", idNewClient);
+  });
   socket.on("disconnect", () => {
     console.log("user disconnected");
   });
