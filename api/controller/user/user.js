@@ -51,6 +51,7 @@ exports.get_by_id = (req, res, next) => {
           email: user.email,
           _id: user._id,
           avatar: user.avatar,
+          birthDate: user.dateOfBirth,
           request: {
             type: "GET",
             url: "http://localhost:3000/user/" + user._id,
@@ -388,15 +389,37 @@ exports.reset_password = async (req, res) => {
       .json({ message: "Internal server error", error: err.message });
   }
 };
-exports.upload_img = (req, res) => {
-  const { email } = req.body;
-  const imagePath = req.file.path; // Multer stores the file and we get the path
+exports.update_user = (req, res) => {
+  const { email, name, dateOfBirth } = req.body;
+  const imagePath = req.file ? req.file.path : null;
 
-  User.updateOne({ email: email }, { avatar: imagePath })
+  // Kiểm tra dữ liệu đầu vào
+  if (!email) {
+    return res.status(400).json({ message: "Email là bắt buộc!" });
+  }
+
+  // Tạo đối tượng cập nhật
+  const updateData = {};
+  if (name) updateData.name = name;
+  if (dateOfBirth) updateData.dateOfBirth = dateOfBirth;
+  if (imagePath) updateData.avatar = imagePath;
+
+  // Cập nhật thông tin người dùng trong cơ sở dữ liệu
+  User.updateOne({ email: email }, updateData)
     .then((result) => {
-      // console.log("Cập nhật thành công:", result);
+      if (result.matchedCount === 0) {
+        return res.status(404).json({ message: "Không tìm thấy người dùng!" });
+      }
+      res.status(200).json({
+        message: "Cập nhật thông tin người dùng thành công!",
+        data: result,
+        updatedFields: updateData,
+      });
     })
     .catch((error) => {
-      console.error("Lỗi khi cập nhật:", error);
+      res.status(500).json({
+        message: "Lỗi khi cập nhật thông tin người dùng!",
+        error: error.message,
+      });
     });
 };

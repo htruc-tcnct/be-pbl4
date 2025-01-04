@@ -27,9 +27,10 @@ const corsOptions = {
   credentials: true,
   exposedHeaders: ["Set-cookie"],
 };
-
+app.use(express.json({ limit: "10mb" })); // Cho phép payload JSON lớn hơn
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(cors(corsOptions));
-
+app.use("/uploads", express.static("uploads"));
 app.options("*", cors(corsOptions));
 app.use(
   session({
@@ -59,7 +60,7 @@ const upload = multer({
 });
 
 app.use(morgan("dev"));
-app.use(bodyParser.urlencoded({ extended: false }));
+// app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 app.use("/user", userRoutes);
