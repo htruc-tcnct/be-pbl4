@@ -374,14 +374,14 @@ exports.on_share_code = async (req, res) => {
 };
 
 exports.share_Document_with_email = async (req, res) => {
-  const { email, id } = req.body;
+  const { email, id, ownerId, shareCode } = req.body;
 
   // Kiểm tra xem email có hợp lệ không
   if (!email) {
     return res.status(400).json({ error: "Email is required" });
   }
 
-  const link = `${process.env.CLIENT_URL}/documents/share/${id}`;
+  const link = `${process.env.CLIENT_URL}/documents/detail/${id}?ownerIdDocument=${ownerId}`;
 
   try {
     const accessToken = await oAuth2Client.getAccessToken();
@@ -409,6 +409,7 @@ exports.share_Document_with_email = async (req, res) => {
       <p>
         <a href="${link}" target="_blank" style="background-color: #4CAF50; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px;">Mở Tài Liệu</a>
       </p>
+      <p>Hoặc nhập mã tài liệu để tham gia cùng tôi: ${shareCode} </p>
       <p>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!</p>
       <footer style="margin-top: 20px; font-size: 12px; color: #777;">
         <p>Nếu bạn không mong muốn nhận email này, vui lòng liên hệ với chúng tôi.</p>

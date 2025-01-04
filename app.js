@@ -23,6 +23,7 @@ const corsOptions = {
     "http://localhost:5173",
     "http://192.168.1.6:5173",
     "https://fe-pbl4-ytsx.vercel.app",
+    "http://10.10.76.0:5173",
   ],
   credentials: true,
   exposedHeaders: ["Set-cookie"],

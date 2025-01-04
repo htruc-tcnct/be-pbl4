@@ -51,4 +51,7 @@ router.post(
   userController.update_user
 );
 
+router.get("/check-auth", checkAuth, (req, res) => {
+  res.json({ authenticated: true });
+});
 module.exports = router;

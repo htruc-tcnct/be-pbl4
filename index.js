@@ -12,6 +12,7 @@ const io = new Server(server, {
       "http://localhost:5173",
       "http://192.168.1.6:5173",
       "https://fe-pbl4-ytsx.vercel.app",
+      "http://10.10.76.0:5173",
     ],
     credentials: true,
   },
@@ -140,7 +141,10 @@ io.on("connection", (socket) => {
   socket.on("send-docx-file", (arrayBuffer) => {
     console.log("Received data type:", typeof arrayBuffer);
     console.log("Received data:", arrayBuffer);
-
+    if (!addressDetail) {
+      console.error("Error: addressDetail is undefined or invalid.");
+      return; // Dừng lại nếu addressDetail không hợp lệ
+    }
     // Kiểm tra nếu dữ liệu là ArrayBuffer hoặc Buffer
     if (arrayBuffer instanceof ArrayBuffer || Buffer.isBuffer(arrayBuffer)) {
       const buffer = Buffer.isBuffer(arrayBuffer)
