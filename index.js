@@ -20,11 +20,36 @@ const io = new Server(server, {
 var idRoomAndOwner;
 var priority = 1;
 idRoomAndOwner = [];
+let listUserInRoom = {};
+const listSendUpdateUserList = new Set();
 io.on("connection", (socket) => {
   console.log("a user connected");
   socket.on("register", (data, callback) => {
     const dulieu = JSON.parse(data);
+    socket.userId = dulieu.userId;
+    socket.documentId = dulieu.documentId;
+
     // console.log("Received registration data: ", dulieu);
+    if (!listUserInRoom[dulieu.documentId]) {
+      listUserInRoom[dulieu.documentId] = [];
+    }
+    if (!listUserInRoom[dulieu.documentId].includes(dulieu.userId)) {
+      listUserInRoom[dulieu.documentId].push(dulieu.userId);
+
+      console.log("Updated listUserInRoom: ", listUserInRoom);
+    }
+    if (!listSendUpdateUserList.has(dulieu.userId)) {
+      io.emit("update-user-list", {
+        documentId: dulieu.documentId,
+        users: listUserInRoom[dulieu.documentId],
+      });
+
+      // Thêm userId vào Set
+      listSendUpdateUserList.add(dulieu.userId);
+    }
+
+    // Phát danh sách người dùng trong group tới các client khác
+
     if (dulieu.ownerId != dulieu.userId) {
       // console.log("không phải chủ phòn cg, không tạo thêm phòng");
       callback("không phải chủ phòng");
@@ -51,9 +76,9 @@ io.on("connection", (socket) => {
         priority: 1,
       });
     } else {
-      console.log("Duplicate data. Skipping...");
+      // console.log("Duplicate data. Skipping...");
     }
-    console.log("List phòng: ", idRoomAndOwner);
+    // console.log("List phòng: ", idRoomAndOwner);
     callback("bạn là chủ phòng");
   });
 
@@ -177,7 +202,28 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("endupdating", idNewClient);
   });
   socket.on("disconnect", () => {
-    console.log("user disconnected");
+    const { userId, documentId } = socket;
+
+    if (userId && documentId && listUserInRoom[documentId]) {
+      // Xóa userId khỏi danh sách
+      listUserInRoom[documentId] = listUserInRoom[documentId].filter(
+        (id) => id !== userId
+      );
+      listSendUpdateUserList.delete(userId);
+      console.log(`User ${userId} disconnected from document ${documentId}`);
+      console.log("Updated listUserInRoom: ", listUserInRoom);
+
+      // Nếu không còn user trong documentId, xóa documentId
+      if (listUserInRoom[documentId].length === 0) {
+        delete listUserInRoom[documentId];
+      }
+
+      // Phát danh sách cập nhật tới tất cả các client
+      io.emit("update-user-list", {
+        documentId,
+        users: listUserInRoom[documentId] || [],
+      });
+    }
   });
 });
 server.listen(port, "0.0.0.0", () => {
